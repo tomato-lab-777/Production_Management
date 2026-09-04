@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>生産管理</title>
+<style>
+  :root{
+    --bg:#F2F2F7;
+    --card:#FFFFFF;
+    --text:#1C1C1E;
+    --text-secondary:#8E8E93;
+    --hairline:#E5E5EA;
+    --accent:#2C3E63;
+    --accent-soft:#E7EAF1;
+    --green:#2FBE54; --green-deep:#1F8B3B;
+    --amber:#FF9F0A; --amber-deep:#B36A00;
+    --red:#FF453A; --red-deep:#B0281F;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%; margin:0;}
+  body{
+    font-family:var(--font); background:var(--bg); color:var(--text);
+    display:flex; flex-direction:column; overflow:hidden;
+    height:100dvh;
+  }
+
+  .topbar{
+    padding:calc(env(safe-area-inset-top,0) + 14px) 20px 10px;
+    display:grid; grid-template-columns:1fr auto 1fr; align-items:flex-start; gap:8px; flex-shrink:0;
+  }
+  .topbar .titles{display:flex; flex-direction:column; gap:2px; justify-self:start;}
+  .topbar .date{font-size:12px; color:var(--text-secondary); font-weight:600;}
+  .topbar h1{margin:2px 0 0; font-size:20px; font-weight:700; letter-spacing:-0.01em;}
+  .gear-btn{
+    justify-self:end;
+    width:34px; height:34px; border-radius:50%; border:none; background:var(--accent-soft);
+    color:var(--accent); font-size:16px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; flex-shrink:0; margin-top:2px;
+  }
+  .sync-status{
+    justify-self:center; align-self:center; font-size:11.5px; font-weight:600; white-space:nowrap;
+    padding:5px 11px; border-radius:10px; min-height:1em;
+  }
+  .sync-status.pending{color:var(--text-secondary);}
+  .sync-status.success{color:var(--green-deep);}
+  .sync-status.warn{color:var(--amber-deep);}
+  .sync-status.error{color:var(--red-deep); display:flex; align-items:center; gap:6px; padding-right:6px;}
+
+  .view{display:flex; flex-direction:column; flex:1; min-height:0;}
+  .view[hidden]{display:none;}
+
+  .settings-body{flex:1; min-height:0; overflow-y:auto; padding:6px 20px 10px; display:flex; flex-direction:column; gap:14px;}
+  .settings-card{background:var(--card); border-radius:16px; padding:16px; box-shadow:0 1px 2px rgba(20,20,30,.05);}
+  .settings-card h3{margin:0 0 4px; font-size:14px; font-weight:700;}
+  .settings-card p{margin:0 0 12px; font-size:12px; color:var(--text-secondary); line-height:1.5;}
+  .field-row{display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-top:1px solid var(--hairline);}
+  .field-row:first-of-type{border-top:none;}
+  .field-row label{font-size:13.5px; font-weight:600;}
+  .field-row .input-wrap{display:flex; align-items:center; gap:6px;}
+  .field-row input{
+    width:64px; padding:8px 10px; border-radius:9px; border:1px solid var(--hairline);
+    font-size:14px; text-align:right; font-variant-numeric:tabular-nums;
+  }
+  .field-row .unit{font-size:13px; color:var(--text-secondary);}
+  .save-btn{
+    background:var(--accent); color:#fff; border:none; padding:13px; border-radius:14px;
+    font-size:14.5px; font-weight:700; cursor:pointer; margin:4px 20px 0;
+  }
+
+  .status-row{
+    display:flex; gap:8px; margin:0 20px 10px; flex-shrink:0;
+  }
+  .status-banner, .week-banner{
+    flex:1; min-width:0; border-radius:14px; padding:11px 12px; color:#fff;
+    display:flex; flex-direction:column; gap:1px;
+  }
+  .status-banner.status-yellow, .week-banner.status-yellow{background:var(--amber);}
+  .status-banner.status-green, .week-banner.status-green{background:var(--green);}
+  .status-banner.status-red, .week-banner.status-red{background:var(--red);}
+  .status-banner .label, .week-banner .label{font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; opacity:.9;}
+  .status-banner .msg, .week-banner .msg{font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+  .list{
+    flex:1; min-height:0; overflow-y:auto; padding:0 20px 10px; display:flex; flex-direction:column; gap:8px;
+  }
+
+  .task{
+    background:var(--card); border-radius:16px; padding:12px 14px;
+    box-shadow:0 1px 2px rgba(20,20,30,.05);
+  }
+
+  .task-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+  .task-name{font-size:15px; font-weight:700;}
+  .task-progress{font-size:12.5px; color:var(--text-secondary); font-variant-numeric:tabular-nums; font-weight:600;}
+  .task-progress.complete{color:var(--green-deep);}
+
+  .retry-btn{
+    border:none; background:var(--red); color:#fff; font-size:10.5px; font-weight:700;
+    padding:3px 9px; border-radius:8px; cursor:pointer;
+  }
+
+
+  .checks{display:flex; flex-wrap:wrap; gap:6px;}
+  .chk{
+    width:30px; height:30px; border-radius:50%; border:2px solid var(--hairline); background:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;
+    color:transparent; cursor:pointer; flex-shrink:0;
+  }
+  .chk.done{background:var(--green); border-color:var(--green); color:#fff;}
+  .chk:active{transform:scale(.92);}
+  .chk-add{
+    width:30px; height:30px; border-radius:50%; border:2px dashed var(--text-secondary); background:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700;
+    color:var(--text-secondary); cursor:pointer; flex-shrink:0;
+  }
+  .chk-add:active{transform:scale(.92);}
+
+  .empty-state{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:var(--text-secondary); gap:6px; text-align:center; padding:0 40px;
+  }
+  .empty-state .big{font-size:34px;}
+  .empty-state .txt{font-size:14px; font-weight:600;}
+
+  .footer{
+    flex-shrink:0; padding:12px 20px calc(env(safe-area-inset-bottom,0) + 14px);
+    border-top:1px solid var(--hairline); background:var(--card);
+  }
+  .footer p{margin:0; font-size:11.5px; color:var(--text-secondary); line-height:1.5; text-align:center;}
+</style>
+</head>
+<body>
+
+  <div class="view" id="homeView">
+    <div class="topbar">
+      <div class="titles">
+        <div class="date" id="dateLabel"></div>
+        <h1>今日の生産</h1>
+      </div>
+      <div class="sync-status" id="syncStatus"></div>
+      <button class="gear-btn" onclick="showSettings()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="status-row">
+      <div class="status-banner status-yellow" id="statusBanner">
+        <span class="label">本日</span>
+        <span class="msg" id="statusMsg">未完了</span>
+      </div>
+      <div class="week-banner status-yellow" id="weekBanner">
+        <span class="label">今週</span>
+        <span class="msg" id="weekChipText">計算中</span>
+      </div>
+    </div>
+
+    <div class="list" id="list"></div>
+
+    <div class="footer">
+      <p>週間計画・商品設定・生産可能数の入力はスプレッドシートで行ってください</p>
+    </div>
+  </div>
+
+  <div class="view" id="settingsView" hidden>
+    <div class="topbar">
+      <div class="titles">
+        <div class="date">設定</div>
+        <h1>今週の判定基準</h1>
+      </div>
+      <button class="gear-btn" onclick="showHome()">✕</button>
+    </div>
+
+    <div class="settings-body">
+      <div class="settings-card">
+        <h3>「余裕なし」の判定ライン</h3>
+        <p>今週の残り生産可能数が、必要数に対してこの基準以下まで近づいたら「余裕なし」と表示します(%と個数、大きい方を採用)。</p>
+        <div class="field-row">
+          <label>必要数に対する割合</label>
+          <div class="input-wrap">
+            <input type="number" id="pctInput" value="15" min="0" max="100">
+            <span class="unit">%</span>
+          </div>
+        </div>
+        <div class="field-row">
+          <label>個数の下限</label>
+          <div class="input-wrap">
+            <input type="number" id="countInput" value="2" min="0">
+            <span class="unit">個</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="save-btn" onclick="saveSettings()">保存</button>
+    <div style="height:16px;"></div>
+  </div>
+
+<script>
+/* ==== API設定 ==== */
+const API_URL = "https://script.google.com/macros/s/AKfycbwE10HVq-vqGpLzeC0QSuIrS9vqwfEWpWuGSrS7MOf4cGCUIo7Ua3rbxPgVE1y-BrRZ/exec";
+const API_KEY = "22RXNNTG";
+const REQUEST_TIMEOUT_MS = 10000;
+
+const SETTINGS_KEY = 'productionAppSettings';
+
+function loadSettings(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    if (saved && typeof saved.tightPct === 'number' && typeof saved.tightCount === 'number') {
+      return saved;
+    }
+  } catch (e) { /* 保存データが無い/壊れている場合は初期値を使う */ }
+  return { tightPct: 15, tightCount: 2 };
+}
+
+const state = {
+  tasks: [],              // {id, name, qty, done, lastSyncedDone}
+  week: { weekTarget: 0, weekUnresolved: 0, weekSurplus: 0 },
+  settings: loadSettings(),
+  sync: { status: 'idle', firstFailureAt: null }, // idle|pending|synced|unsynced|unsynced-long
+  loadState: 'loading', // loading|ready|error
+  loadError: '',
+};
+
+const SYNC_DEBOUNCE_MS = 1500;
+const SYNC_GRACE_MS = 5 * 60 * 1000; // 5分
+let syncDebounceTimer = null;
+let clearBadgeTimer = null;
+
+/* ==== GAS通信 ==== */
+async function fetchWithTimeout(url, options){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    const json = await res.json();
+    if (json && json.error) throw new Error(json.error);
+    return json;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchTodayPlan(){
+  return fetchWithTimeout(`${API_URL}?key=${encodeURIComponent(API_KEY)}`, { method: 'GET' });
+}
+
+async function postCompletion(skuId, done){
+  return fetchWithTimeout(`${API_URL}?key=${encodeURIComponent(API_KEY)}`, {
+    method: 'POST',
+    body: JSON.stringify({ skuId, done }),
+  });
+}
+
+/* ==== 初期読み込み ==== */
+async function initApp(){
+  state.loadState = 'loading';
+  renderLoadState();
+  try {
+    const data = await fetchTodayPlan();
+    state.tasks = (data.today || []).map(t => ({
+      id: t.id, name: t.name, qty: t.qty, done: t.done, lastSyncedDone: t.done,
+    }));
+    state.week = {
+      weekTarget: data.weekTarget || 0,
+      weekUnresolved: data.weekUnresolved || 0,
+      weekSurplus: data.weekSurplus || 0,
+    };
+    state.loadState = 'ready';
+    render();
+    renderWeekChip();
+    renderSyncStatus();
+  } catch (err) {
+    state.loadState = 'error';
+    state.loadError = String(err);
+    renderLoadState();
+  }
+}
+
+function renderLoadState(){
+  const listEl = document.getElementById('list');
+  if (state.loadState === 'loading') {
+    listEl.innerHTML = `<div class="empty-state"><div class="txt">読み込み中...</div></div>`;
+  } else if (state.loadState === 'error') {
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <div class="txt">データを取得できませんでした</div>
+        <div class="txt" style="font-weight:400; font-size:12px; color:var(--text-secondary);">${state.loadError}</div>
+        <button class="save-btn" style="margin-top:8px;" onclick="initApp()">再読み込み</button>
+      </div>`;
+  }
+}
+
+/* ==== 週の判定 ==== */
+function computeWeekStatus(){
+  const { weekTarget, weekUnresolved, weekSurplus } = state.week;
+  const { tightPct, tightCount } = state.settings;
+
+  if (weekTarget <= 0) return { key: 'sufficient', unresolved: 0 };
+  if (weekUnresolved > 0) return { key: 'deficit', unresolved: weekUnresolved };
+
+  const threshold = Math.max(tightCount, weekTarget * (tightPct / 100));
+  if (weekSurplus <= threshold) return { key: 'tight', unresolved: 0 };
+
+  return { key: 'sufficient', unresolved: 0 };
+}
+
+function renderWeekChip(){
+  const banner = document.getElementById('weekBanner');
+  const text = document.getElementById('weekChipText');
+  const result = computeWeekStatus();
+
+  const config = {
+    deficit:    { cls: 'status-red',    msg: `不足${result.unresolved}個` },
+    tight:      { cls: 'status-yellow', msg: '余裕なし' },
+    sufficient: { cls: 'status-green',  msg: '順調' },
+  }[result.key];
+
+  banner.className = 'week-banner ' + config.cls;
+  text.textContent = config.msg;
+}
+
+function formatDate(){
+  const d = new Date();
+  const wk = ['日','月','火','水','木','金','土'][d.getDay()];
+  return `${d.getMonth()+1}月${d.getDate()}日(${wk})`;
+}
+
+function render(){
+  document.getElementById('dateLabel').textContent = formatDate();
+  if (state.loadState !== 'ready') return;
+
+  const listEl = document.getElementById('list');
+  const hasTasks = state.tasks.length > 0;
+  const allDone = hasTasks && state.tasks.every(t => t.done >= t.qty);
+
+  const banner = document.getElementById('statusBanner');
+  const msg = document.getElementById('statusMsg');
+  banner.className = 'status-banner ' + (allDone || !hasTasks ? 'status-green' : 'status-yellow');
+  msg.textContent = !hasTasks ? '予定なし' : (allDone ? '完了' : '未完了');
+
+  if (!hasTasks) {
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <div class="big">✓</div>
+        <div class="txt">今日作るものはありません</div>
+      </div>`;
+    return;
+  }
+
+  listEl.innerHTML = state.tasks.map(t => {
+    const complete = t.done >= t.qty;
+    const circles = Array.from({length: t.qty}, (_, i) => {
+      const isDone = i < t.done;
+      return `<div class="chk ${isDone ? 'done' : ''}" onclick="toggleUnit('${t.id}', ${i})">${isDone ? '✓' : ''}</div>`;
+    }).join('');
+    return `
+      <div class="task">
+        <div class="task-top">
+          <span class="task-name">${t.name}</span>
+          <span class="task-progress ${complete ? 'complete' : ''}">${complete ? '完了' : `${t.done}/${t.qty}個`}</span>
+        </div>
+        <div class="checks">
+          ${circles}
+          <div class="chk-add" onclick="addExtraUnit('${t.id}')">+</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleUnit(id, index){
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  if (index < task.done) {
+    task.done = index; // 取り消し
+  } else {
+    task.done = task.done + 1;
+  }
+  render();
+  scheduleSync();
+}
+
+function addExtraUnit(id){
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  // 予定数を超えて作れる枠を1つ追加する(チェックはまだつけない)
+  task.qty += 1;
+  render();
+}
+
+/** タップのたびに呼ぶ。1.5秒操作が無ければまとめて送信する。待っている間は何も表示しない */
+function scheduleSync(){
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+  if (clearBadgeTimer) clearTimeout(clearBadgeTimer);
+  syncDebounceTimer = setTimeout(attemptSync, SYNC_DEBOUNCE_MS);
+}
+
+/** 実際の送信。前回送信済みの値と違うタスクだけをまとめて送る。差分ではなく現在の完了数そのものを送るため、再送しても二重加算にならない */
+async function attemptSync(){
+  const dirty = state.tasks.filter(t => t.done !== t.lastSyncedDone);
+  if (dirty.length === 0) return;
+
+  state.sync.status = 'pending'; // ここで初めて「送信中...」を表示
+  renderSyncStatus();
+
+  try {
+    for (const t of dirty) {
+      await postCompletion(t.id, t.done);
+      t.lastSyncedDone = t.done;
+    }
+    state.sync.status = 'synced'; // 「送信完了」
+    state.sync.firstFailureAt = null;
+    renderSyncStatus();
+    clearBadgeTimer = setTimeout(() => {
+      if (state.sync.status === 'synced') {
+        state.sync.status = 'idle';
+        renderSyncStatus();
+      }
+    }, 3000);
+  } catch (err) {
+    if (!state.sync.firstFailureAt) state.sync.firstFailureAt = Date.now();
+    const elapsed = Date.now() - state.sync.firstFailureAt;
+    state.sync.status = elapsed < SYNC_GRACE_MS ? 'unsynced' : 'unsynced-long';
+    renderSyncStatus();
+  }
+}
+
+function retrySync(){
+  attemptSync();
+}
+
+function renderSyncStatus(){
+  const el = document.getElementById('syncStatus');
+  const map = {
+    idle:            { cls: '', html: '' },
+    pending:         { cls: 'pending', html: '送信中...' },
+    synced:          { cls: 'success', html: '送信完了' },
+    unsynced:        { cls: 'warn', html: '送信失敗' },
+    'unsynced-long': { cls: 'error', html: `<span>送信できていません</span><button class="retry-btn" onclick="retrySync()">再送</button>` },
+  }[state.sync.status];
+  el.className = 'sync-status ' + map.cls;
+  el.innerHTML = map.html;
+}
+
+function showSettings(){
+  document.getElementById('pctInput').value = state.settings.tightPct;
+  document.getElementById('countInput').value = state.settings.tightCount;
+  document.getElementById('homeView').hidden = true;
+  document.getElementById('settingsView').hidden = false;
+}
+
+function showHome(){
+  document.getElementById('settingsView').hidden = true;
+  document.getElementById('homeView').hidden = false;
+}
+
+function saveSettings(){
+  const pct = parseFloat(document.getElementById('pctInput').value);
+  const count = parseFloat(document.getElementById('countInput').value);
+  state.settings.tightPct = isNaN(pct) ? state.settings.tightPct : pct;
+  state.settings.tightCount = isNaN(count) ? state.settings.tightCount : count;
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+  renderWeekChip();
+  showHome();
+}
+
+renderSyncStatus();
+initApp();
+</script>
+</body>
+</html>

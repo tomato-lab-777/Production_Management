@@ -124,6 +124,18 @@
   .empty-state .big{font-size:34px;}
   .empty-state .txt{font-size:14px; font-weight:600;}
 
+  .progress-track{
+    width:160px; height:5px; border-radius:3px; background:var(--hairline); overflow:hidden; margin-bottom:6px;
+  }
+  .progress-bar{
+    width:40%; height:100%; border-radius:3px; background:var(--accent);
+    animation:progress-slide 1.1s ease-in-out infinite;
+  }
+  @keyframes progress-slide{
+    0%{transform:translateX(-100%);}
+    100%{transform:translateX(350%);}
+  }
+
   .footer{
     flex-shrink:0; padding:12px 20px calc(env(safe-area-inset-bottom,0) + 14px);
     border-top:1px solid var(--hairline); background:var(--card);
@@ -285,7 +297,11 @@ async function initApp(){
 function renderLoadState(){
   const listEl = document.getElementById('list');
   if (state.loadState === 'loading') {
-    listEl.innerHTML = `<div class="empty-state"><div class="txt">読み込み中...</div></div>`;
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <div class="progress-track"><div class="progress-bar"></div></div>
+        <div class="txt">最新の在庫を確認しています</div>
+      </div>`;
   } else if (state.loadState === 'error') {
     listEl.innerHTML = `
       <div class="empty-state">

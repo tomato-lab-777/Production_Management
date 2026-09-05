@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="生産管理">
 <title>生産管理</title>
 <style>
   :root{
@@ -68,6 +71,15 @@
     background:var(--accent); color:#fff; border:none; padding:13px; border-radius:14px;
     font-size:14.5px; font-weight:700; cursor:pointer; margin:4px 20px 0;
   }
+  .save-btn.inline{
+    width:100%; margin:12px 0 0; padding:11px;
+  }
+  .save-feedback{
+    font-size:12px; font-weight:600; text-align:center; margin-top:8px; min-height:1.2em;
+  }
+  .save-feedback.pending{color:var(--text-secondary);}
+  .save-feedback.success{color:var(--green-deep);}
+  .save-feedback.error{color:var(--red-deep);}
 
   .status-row{
     display:flex; gap:8px; margin:0 20px 10px; flex-shrink:0;
@@ -182,7 +194,7 @@
     <div class="topbar">
       <div class="titles">
         <div class="date">設定</div>
-        <h1>今週の判定基準</h1>
+        <h1>設定</h1>
       </div>
       <button class="gear-btn" onclick="showHome()">✕</button>
     </div>
@@ -205,11 +217,25 @@
             <span class="unit">個</span>
           </div>
         </div>
+        <button class="save-btn inline" onclick="saveSettings()">この内容で保存</button>
+      </div>
+
+      <div class="settings-card">
+        <h3>曜日ごとの生産可能数</h3>
+        <p>その曜日にプリンターで生産できる個数です。故障などで一時的に変えたい時もここを直接編集してください。</p>
+        <div class="field-row" id="capRow-mon"><label>月</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-mon"><span class="unit">個</span></div></div>
+        <div class="field-row" id="capRow-tue"><label>火</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-tue"><span class="unit">個</span></div></div>
+        <div class="field-row" id="capRow-wed"><label>水</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-wed"><span class="unit">個</span></div></div>
+        <div class="field-row" id="capRow-thu"><label>木</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-thu"><span class="unit">個</span></div></div>
+        <div class="field-row" id="capRow-fri"><label>金</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-fri"><span class="unit">個</span></div></div>
+        <div class="field-row" id="capRow-sat"><label>土</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-sat"><span class="unit">個</span></div></div>
+        <div class="field-row" id="capRow-sun"><label>日</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-sun"><span class="unit">個</span></div></div>
+        <button class="save-btn inline" onclick="saveCapacity()">この内容で保存</button>
+        <div class="save-feedback" id="capacityFeedback"></div>
       </div>
     </div>
 
-    <button class="save-btn" onclick="saveSettings()">保存</button>
-    <div style="height:16px;"></div>
+    <div style="height:10px;"></div>
   </div>
 
 <script>
@@ -233,8 +259,9 @@ function loadSettings(){
 const state = {
   tasks: [],              // {id, name, qty, done, lastSyncedDone}
   week: { weekTarget: 0, weekUnresolved: 0, weekSurplus: 0 },
+  weeklyCapacity: { mon:0, tue:0, wed:0, thu:0, fri:0, sat:0, sun:0 },
   settings: loadSettings(),
-  sync: { status: 'idle', firstFailureAt: null }, // idle|pending|synced|unsynced|unsynced-long
+  sync: { status: 'idle', firstFailureAt: null, notified: false }, // idle|pending|synced|unsynced|unsynced-long
   loadState: 'loading', // loading|ready|error
   loadError: '',
 };
@@ -269,6 +296,13 @@ async function postCompletion(skuId, done){
   });
 }
 
+async function postCapacity(capacity){
+  return fetchWithTimeout(`${API_URL}?key=${encodeURIComponent(API_KEY)}`, {
+    method: 'POST',
+    body: JSON.stringify({ type: 'capacity', capacity }),
+  });
+}
+
 /* ==== 初期読み込み ==== */
 async function initApp(){
   state.loadState = 'loading';
@@ -283,6 +317,7 @@ async function initApp(){
       weekUnresolved: data.weekUnresolved || 0,
       weekSurplus: data.weekSurplus || 0,
     };
+    if (data.weeklyCapacity) state.weeklyCapacity = data.weeklyCapacity;
     state.loadState = 'ready';
     render();
     renderWeekChip();
@@ -417,6 +452,20 @@ function scheduleSync(){
 }
 
 /** 実際の送信。前回送信済みの値と違うタスクだけをまとめて送る。差分ではなく現在の完了数そのものを送るため、再送しても二重加算にならない */
+const NTFY_TOPIC = "tomato777-a8f2-seisan";
+
+async function notifyNtfy(title, message){
+  try {
+    await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+      method: 'POST',
+      body: message,
+      headers: { 'Title': title, 'Priority': '4' },
+    });
+  } catch (e) {
+    // 通知そのものの失敗は無視する(これ以上ユーザーに出せる手段が無いため)
+  }
+}
+
 async function attemptSync(){
   const dirty = state.tasks.filter(t => t.done !== t.lastSyncedDone);
   if (dirty.length === 0) return;
@@ -431,6 +480,7 @@ async function attemptSync(){
     }
     state.sync.status = 'synced'; // 「送信完了」
     state.sync.firstFailureAt = null;
+    state.sync.notified = false;
     renderSyncStatus();
     clearBadgeTimer = setTimeout(() => {
       if (state.sync.status === 'synced') {
@@ -443,6 +493,12 @@ async function attemptSync(){
     const elapsed = Date.now() - state.sync.firstFailureAt;
     state.sync.status = elapsed < SYNC_GRACE_MS ? 'unsynced' : 'unsynced-long';
     renderSyncStatus();
+
+    // 「送信できていません」に切り替わった瞬間だけ通知する(何度も送らない)
+    if (state.sync.status === 'unsynced-long' && !state.sync.notified) {
+      state.sync.notified = true;
+      notifyNtfy('完了報告 送信失敗', `完了報告が送信できていません: ${String(err)}`);
+    }
   }
 }
 
@@ -463,9 +519,16 @@ function renderSyncStatus(){
   el.innerHTML = map.html;
 }
 
+const DAY_KEYS = ['mon','tue','wed','thu','fri','sat','sun'];
+
 function showSettings(){
   document.getElementById('pctInput').value = state.settings.tightPct;
   document.getElementById('countInput').value = state.settings.tightCount;
+  DAY_KEYS.forEach(k => {
+    document.getElementById('cap-' + k).value = state.weeklyCapacity[k];
+  });
+  document.getElementById('capacityFeedback').textContent = '';
+  document.getElementById('capacityFeedback').className = 'save-feedback';
   document.getElementById('homeView').hidden = true;
   document.getElementById('settingsView').hidden = false;
 }
@@ -482,7 +545,33 @@ function saveSettings(){
   state.settings.tightCount = isNaN(count) ? state.settings.tightCount : count;
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
   renderWeekChip();
-  showHome();
+}
+
+async function saveCapacity(){
+  const feedback = document.getElementById('capacityFeedback');
+  const capacity = {};
+  for (const k of DAY_KEYS) {
+    const v = parseInt(document.getElementById('cap-' + k).value, 10);
+    if (isNaN(v) || v < 0) {
+      feedback.className = 'save-feedback error';
+      feedback.textContent = '数字を正しく入力してください';
+      return;
+    }
+    capacity[k] = v;
+  }
+
+  feedback.className = 'save-feedback pending';
+  feedback.textContent = '保存中...';
+
+  try {
+    const result = await postCapacity(capacity);
+    state.weeklyCapacity = result.capacity || capacity;
+    feedback.className = 'save-feedback success';
+    feedback.textContent = '保存しました';
+  } catch (err) {
+    feedback.className = 'save-feedback error';
+    feedback.textContent = `保存できませんでした(${String(err)})`;
+  }
 }
 
 renderSyncStatus();

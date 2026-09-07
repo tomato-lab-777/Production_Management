@@ -34,6 +34,7 @@
     display:grid; grid-template-columns:1fr auto 1fr; align-items:flex-start; gap:8px; flex-shrink:0;
   }
   .topbar .titles{display:flex; flex-direction:column; gap:2px; justify-self:start;}
+  .topbar-actions{display:flex; gap:8px; justify-self:end;}
   .topbar .date{font-size:12px; color:var(--text-secondary); font-weight:600;}
   .topbar h1{margin:2px 0 0; font-size:20px; font-weight:700; letter-spacing:-0.01em;}
   .gear-btn{
@@ -57,7 +58,30 @@
   .settings-body{flex:1; min-height:0; overflow-y:auto; padding:6px 20px 10px; display:flex; flex-direction:column; gap:14px;}
   .settings-card{background:var(--card); border-radius:16px; padding:16px; box-shadow:0 1px 2px rgba(20,20,30,.05);}
   .settings-card h3{margin:0 0 4px; font-size:14px; font-weight:700;}
-  .settings-card p{margin:0 0 12px; font-size:12px; color:var(--text-secondary); line-height:1.5;}
+  .card-head-row{display:flex; align-items:center; justify-content:space-between;}
+  .card-head-row h3{margin:0;}
+  .info-btn{
+    width:20px; height:20px; border-radius:50%; border:none; background:var(--accent-soft); color:var(--accent);
+    font-size:11px; font-weight:700; font-style:italic; font-family:Georgia, serif; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .card-info{margin:6px 0 0; font-size:12px; color:var(--text-secondary); line-height:1.5;}
+  .day-cap-row{display:flex; gap:5px;}
+  .day-cap-cell{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .day-cap-cell label{font-size:11px; color:var(--text-secondary); font-weight:600;}
+  .day-cap-cell input{
+    width:100%; padding:8px 2px; border-radius:9px; border:1px solid var(--hairline);
+    font-size:13px; text-align:center; font-variant-numeric:tabular-nums;
+  }
+  .sku-table{width:100%; border-collapse:collapse;}
+  .sku-table th{font-size:10.5px; font-weight:700; color:var(--text-secondary); text-align:center; padding-bottom:6px;}
+  .sku-table th:first-child{text-align:left;}
+  .sku-table td{padding:6px 3px; border-top:1px solid var(--hairline); text-align:center;}
+  .sku-table td:first-child{text-align:left; font-size:12.5px; font-weight:700; white-space:nowrap;}
+  .sku-table input{
+    width:100%; padding:7px 2px; border-radius:8px; border:1px solid var(--hairline);
+    font-size:13px; text-align:center; font-variant-numeric:tabular-nums;
+  }
   .field-row{display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-top:1px solid var(--hairline);}
   .field-row:first-of-type{border-top:none;}
   .field-row label{font-size:13.5px; font-weight:600;}
@@ -71,15 +95,68 @@
     background:var(--accent); color:#fff; border:none; padding:13px; border-radius:14px;
     font-size:14.5px; font-weight:700; cursor:pointer; margin:4px 20px 0;
   }
-  .save-btn.inline{
-    width:100%; margin:12px 0 0; padding:11px;
-  }
   .save-feedback{
     font-size:12px; font-weight:600; text-align:center; margin-top:8px; min-height:1.2em;
   }
   .save-feedback.pending{color:var(--text-secondary);}
   .save-feedback.success{color:var(--green-deep);}
   .save-feedback.error{color:var(--red-deep);}
+
+  /* ---- 週間プレビュー ---- */
+  .preview-body{flex:1; min-height:0; overflow-y:auto; padding:0 20px 16px;}
+
+  .load-more-btn{
+    display:block; width:100%; background:none; border:1px dashed var(--hairline); color:var(--accent);
+    padding:10px; border-radius:12px; font-size:12.5px; font-weight:600; cursor:pointer; margin-bottom:10px;
+  }
+  .load-more-btn[hidden]{display:none;}
+
+  .day-card{
+    background:var(--card); border-radius:16px; padding:12px 14px; margin-bottom:8px;
+    box-shadow:0 1px 2px rgba(20,20,30,.05);
+  }
+  .day-card.is-past{opacity:.45;}
+  .day-card.is-today{border:2px solid var(--accent);}
+
+  .day-head{display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+  .day-head .day-date{font-size:14px; font-weight:700;}
+  .day-head .today-badge{
+    font-size:10px; font-weight:700; color:#fff; background:var(--accent); padding:2px 7px; border-radius:8px;
+  }
+
+  .day-items{display:flex; flex-direction:column; gap:2px;}
+  .day-item{font-size:13px; font-variant-numeric:tabular-nums;}
+  .day-empty{font-size:12.5px; color:var(--text-secondary);}
+
+  .day-memo-row{display:flex; gap:6px; margin-top:8px;}
+  .day-memo-row input{
+    flex:1; min-width:0; padding:7px 9px; border-radius:9px; border:1px solid var(--hairline); font-size:12.5px;
+  }
+  .day-memo-save{
+    flex-shrink:0; border:none; background:var(--accent-soft); color:var(--accent); font-size:11.5px;
+    font-weight:700; padding:0 12px; border-radius:9px; cursor:pointer;
+  }
+
+  .cal-header{display:flex; align-items:center; justify-content:space-between; padding:8px 0 4px;}
+  .cal-month-label{font-size:15px; font-weight:700;}
+  .cal-nav-btn{
+    width:32px; height:32px; border-radius:50%; border:none; background:var(--accent-soft); color:var(--accent);
+    font-size:17px; font-weight:700; cursor:pointer;
+  }
+  .cal-weekday-row{display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-size:11px;
+    color:var(--text-secondary); font-weight:600; padding:4px 0;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:14px;}
+  .cal-cell{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:10px;
+    font-size:13px; font-variant-numeric:tabular-nums; cursor:pointer; background:var(--card);
+  }
+  .cal-cell.empty{background:none; cursor:default;}
+  .cal-cell.is-today{border:2px solid var(--accent);}
+  .cal-cell.is-selected{background:var(--accent); color:#fff; font-weight:700;}
+  .cal-cell.has-memo::after{
+    content:""; position:relative; top:9px; width:4px; height:4px; border-radius:50%; background:var(--amber);
+  }
+
 
   .status-row{
     display:flex; gap:8px; margin:0 20px 10px; flex-shrink:0;
@@ -164,12 +241,22 @@
         <h1>今日の生産</h1>
       </div>
       <div class="sync-status" id="syncStatus"></div>
-      <button class="gear-btn" onclick="showSettings()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
-      </button>
+      <div class="topbar-actions">
+        <button class="gear-btn" onclick="showPreview()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17">
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </button>
+        <button class="gear-btn" onclick="showSettings()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div class="status-row">
@@ -201,8 +288,28 @@
 
     <div class="settings-body">
       <div class="settings-card">
-        <h3>「余裕なし」の判定ライン</h3>
-        <p>今週の残り生産可能数が、必要数に対してこの基準以下まで近づいたら「余裕なし」と表示します(%と個数、大きい方を採用)。</p>
+        <div class="card-head-row">
+          <h3>曜日ごとの生産可能数</h3>
+          <button class="info-btn" onclick="toggleInfo('info-cap')">i</button>
+        </div>
+        <p class="card-info" id="info-cap" hidden>その曜日にプリンターで生産できる個数です。故障などで一時的に変えたい時もここを直接編集してください。</p>
+        <div class="day-cap-row">
+          <div class="day-cap-cell"><label>月</label><input type="number" min="0" class="cap-input" id="cap-mon"></div>
+          <div class="day-cap-cell"><label>火</label><input type="number" min="0" class="cap-input" id="cap-tue"></div>
+          <div class="day-cap-cell"><label>水</label><input type="number" min="0" class="cap-input" id="cap-wed"></div>
+          <div class="day-cap-cell"><label>木</label><input type="number" min="0" class="cap-input" id="cap-thu"></div>
+          <div class="day-cap-cell"><label>金</label><input type="number" min="0" class="cap-input" id="cap-fri"></div>
+          <div class="day-cap-cell"><label>土</label><input type="number" min="0" class="cap-input" id="cap-sat"></div>
+          <div class="day-cap-cell"><label>日</label><input type="number" min="0" class="cap-input" id="cap-sun"></div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-head-row">
+          <h3>「余裕なし」の判定ライン</h3>
+          <button class="info-btn" onclick="toggleInfo('info-threshold')">i</button>
+        </div>
+        <p class="card-info" id="info-threshold" hidden>今週の残り生産可能数が、必要数に対してこの基準以下まで近づいたら「余裕なし」と表示します(%と個数、大きい方を採用)。</p>
         <div class="field-row">
           <label>必要数に対する割合</label>
           <div class="input-wrap">
@@ -217,25 +324,62 @@
             <span class="unit">個</span>
           </div>
         </div>
-        <button class="save-btn inline" onclick="saveSettings()">この内容で保存</button>
       </div>
 
       <div class="settings-card">
-        <h3>曜日ごとの生産可能数</h3>
-        <p>その曜日にプリンターで生産できる個数です。故障などで一時的に変えたい時もここを直接編集してください。</p>
-        <div class="field-row" id="capRow-mon"><label>月</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-mon"><span class="unit">個</span></div></div>
-        <div class="field-row" id="capRow-tue"><label>火</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-tue"><span class="unit">個</span></div></div>
-        <div class="field-row" id="capRow-wed"><label>水</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-wed"><span class="unit">個</span></div></div>
-        <div class="field-row" id="capRow-thu"><label>木</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-thu"><span class="unit">個</span></div></div>
-        <div class="field-row" id="capRow-fri"><label>金</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-fri"><span class="unit">個</span></div></div>
-        <div class="field-row" id="capRow-sat"><label>土</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-sat"><span class="unit">個</span></div></div>
-        <div class="field-row" id="capRow-sun"><label>日</label><div class="input-wrap"><input type="number" min="0" class="cap-input" id="cap-sun"><span class="unit">個</span></div></div>
-        <button class="save-btn inline" onclick="saveCapacity()">この内容で保存</button>
-        <div class="save-feedback" id="capacityFeedback"></div>
+        <div class="card-head-row">
+          <h3>商品ごとの設定</h3>
+          <button class="info-btn" onclick="toggleInfo('info-sku')">i</button>
+        </div>
+        <p class="card-info" id="info-sku" hidden>棚卸で在庫がずれた時の修正や、リードタイムの変更に使ってください。</p>
+        <table class="sku-table">
+          <tr><th>商品</th><th>在庫</th><th>梱包</th><th>FBA</th></tr>
+          <tbody id="skuSettingsList"></tbody>
+        </table>
       </div>
     </div>
 
+    <button class="save-btn" onclick="saveAllSettings()">まとめて保存</button>
+    <div class="save-feedback" id="settingsFeedback"></div>
     <div style="height:10px;"></div>
+  </div>
+
+  <div class="view" id="previewView" hidden>
+    <div class="topbar">
+      <div class="titles">
+        <div class="date" id="previewSubtitle">生産予定</div>
+        <h1 id="previewTitle">今週・来週</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="gear-btn" id="calendarToggleBtn" onclick="toggleCalendarMode()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17">
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </button>
+        <button class="gear-btn" onclick="showHome()">✕</button>
+      </div>
+    </div>
+
+    <div class="preview-body" id="previewListBody">
+      <button class="load-more-btn" id="loadMoreBtn" onclick="loadMorePastDays()">さらに表示(過去7日)</button>
+      <div id="previewDayList"></div>
+    </div>
+
+    <div class="preview-body" id="previewCalendarBody" hidden>
+      <div class="cal-header">
+        <button class="cal-nav-btn" onclick="changeCalendarMonth(-1)">‹</button>
+        <div class="cal-month-label" id="calMonthLabel"></div>
+        <button class="cal-nav-btn" onclick="changeCalendarMonth(1)">›</button>
+      </div>
+      <div class="cal-weekday-row">
+        <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-selected-list" id="calSelectedList"></div>
+    </div>
   </div>
 
 <script>
@@ -260,10 +404,20 @@ const state = {
   tasks: [],              // {id, name, qty, done, lastSyncedDone}
   week: { weekTarget: 0, weekUnresolved: 0, weekSurplus: 0 },
   weeklyCapacity: { mon:0, tue:0, wed:0, thu:0, fri:0, sat:0, sun:0 },
+  skuSettings: [], // [{id, name, currentStock, packingLeadTime, fbaLeadTime}]
   settings: loadSettings(),
   sync: { status: 'idle', firstFailureAt: null, notified: false }, // idle|pending|synced|unsynced|unsynced-long
   loadState: 'loading', // loading|ready|error
   loadError: '',
+  preview: {
+    mode: 'list', // list|calendar
+    days: [],
+    loadedStart: null,
+    loadedEnd: null,
+    calendarYear: null,
+    calendarMonth: null, // 0-11
+    selectedDate: null,
+  },
 };
 
 const SYNC_DEBOUNCE_MS = 1500;
@@ -303,6 +457,26 @@ async function postCapacity(capacity){
   });
 }
 
+async function postSkuSettings(skuId, fields){
+  return fetchWithTimeout(`${API_URL}?key=${encodeURIComponent(API_KEY)}`, {
+    method: 'POST',
+    body: JSON.stringify({ type: 'skuSettings', skuId, fields }),
+  });
+}
+
+async function fetchPreviewRange(start, end){
+  return fetchWithTimeout(`${API_URL}?key=${encodeURIComponent(API_KEY)}&action=preview&start=${start}&end=${end}`, {
+    method: 'GET',
+  });
+}
+
+async function postMemo(date, memo){
+  return fetchWithTimeout(`${API_URL}?key=${encodeURIComponent(API_KEY)}`, {
+    method: 'POST',
+    body: JSON.stringify({ type: 'memo', date, memo }),
+  });
+}
+
 /* ==== 初期読み込み ==== */
 async function initApp(){
   state.loadState = 'loading';
@@ -318,6 +492,7 @@ async function initApp(){
       weekSurplus: data.weekSurplus || 0,
     };
     if (data.weeklyCapacity) state.weeklyCapacity = data.weeklyCapacity;
+    if (data.skuSettings) state.skuSettings = data.skuSettings;
     state.loadState = 'ready';
     render();
     renderWeekChip();
@@ -521,51 +696,98 @@ function renderSyncStatus(){
 
 const DAY_KEYS = ['mon','tue','wed','thu','fri','sat','sun'];
 
+function toggleInfo(id){
+  const el = document.getElementById(id);
+  el.hidden = !el.hidden;
+}
+
 function showSettings(){
   document.getElementById('pctInput').value = state.settings.tightPct;
   document.getElementById('countInput').value = state.settings.tightCount;
   DAY_KEYS.forEach(k => {
     document.getElementById('cap-' + k).value = state.weeklyCapacity[k];
   });
-  document.getElementById('capacityFeedback').textContent = '';
-  document.getElementById('capacityFeedback').className = 'save-feedback';
+  const feedback = document.getElementById('settingsFeedback');
+  feedback.className = 'save-feedback';
+  feedback.textContent = '';
+  renderSkuSettingsList();
   document.getElementById('homeView').hidden = true;
   document.getElementById('settingsView').hidden = false;
 }
 
+function renderSkuSettingsList(){
+  const el = document.getElementById('skuSettingsList');
+  el.innerHTML = state.skuSettings.map(s => `
+    <tr>
+      <td>${s.name}</td>
+      <td><input type="number" min="0" id="sku-stock-${s.id}" value="${s.currentStock}"></td>
+      <td><input type="number" min="0" id="sku-packing-${s.id}" value="${s.packingLeadTime}"></td>
+      <td><input type="number" min="0" id="sku-fba-${s.id}" value="${s.fbaLeadTime}"></td>
+    </tr>
+  `).join('');
+}
+
 function showHome(){
   document.getElementById('settingsView').hidden = true;
+  document.getElementById('previewView').hidden = true;
   document.getElementById('homeView').hidden = false;
 }
 
-function saveSettings(){
+/** 3セクション(判定ライン/生産可能数/商品ごとの設定)をまとめて保存する */
+async function saveAllSettings(){
+  const feedback = document.getElementById('settingsFeedback');
+
   const pct = parseFloat(document.getElementById('pctInput').value);
   const count = parseFloat(document.getElementById('countInput').value);
-  state.settings.tightPct = isNaN(pct) ? state.settings.tightPct : pct;
-  state.settings.tightCount = isNaN(count) ? state.settings.tightCount : count;
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
-  renderWeekChip();
-}
+  if (isNaN(pct) || pct < 0 || isNaN(count) || count < 0) {
+    feedback.className = 'save-feedback error';
+    feedback.textContent = '判定ラインの数字を正しく入力してください';
+    return;
+  }
 
-async function saveCapacity(){
-  const feedback = document.getElementById('capacityFeedback');
   const capacity = {};
   for (const k of DAY_KEYS) {
     const v = parseInt(document.getElementById('cap-' + k).value, 10);
     if (isNaN(v) || v < 0) {
       feedback.className = 'save-feedback error';
-      feedback.textContent = '数字を正しく入力してください';
+      feedback.textContent = '生産可能数の数字を正しく入力してください';
       return;
     }
     capacity[k] = v;
   }
 
+  const skuUpdates = [];
+  for (const s of state.skuSettings) {
+    const stock = parseInt(document.getElementById('sku-stock-' + s.id).value, 10);
+    const packing = parseInt(document.getElementById('sku-packing-' + s.id).value, 10);
+    const fba = parseInt(document.getElementById('sku-fba-' + s.id).value, 10);
+    if (isNaN(stock) || stock < 0 || isNaN(packing) || packing < 0 || isNaN(fba) || fba < 0) {
+      feedback.className = 'save-feedback error';
+      feedback.textContent = `${s.name} の数字を正しく入力してください`;
+      return;
+    }
+    skuUpdates.push({ id: s.id, fields: { currentStock: stock, packingLeadTime: packing, fbaLeadTime: fba } });
+  }
+
+  // 判定ラインはローカル保存のみ
+  state.settings.tightPct = pct;
+  state.settings.tightCount = count;
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+  renderWeekChip();
+
   feedback.className = 'save-feedback pending';
   feedback.textContent = '保存中...';
 
   try {
-    const result = await postCapacity(capacity);
-    state.weeklyCapacity = result.capacity || capacity;
+    const capResult = await postCapacity(capacity);
+    state.weeklyCapacity = capResult.capacity || capacity;
+
+    for (const u of skuUpdates) {
+      const result = await postSkuSettings(u.id, u.fields);
+      const idx = state.skuSettings.findIndex(s => s.id === u.id);
+      if (idx >= 0 && result.sku) state.skuSettings[idx] = result.sku;
+    }
+
     feedback.className = 'save-feedback success';
     feedback.textContent = '保存しました';
   } catch (err) {
@@ -576,6 +798,188 @@ async function saveCapacity(){
 
 renderSyncStatus();
 initApp();
+
+/* ==== 週間プレビュー ==== */
+function pad2(n){ return String(n).padStart(2, '0'); }
+
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+}
+
+function addDaysStr(str, n){
+  const [y, m, d] = str.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + n);
+  return `${dt.getFullYear()}-${pad2(dt.getMonth()+1)}-${pad2(dt.getDate())}`;
+}
+
+function formatDayLabel(dateStr){
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  const wk = ['日','月','火','水','木','金','土'][dt.getDay()];
+  return `${m}/${d}(${wk})`;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function dayCardHTML(day){
+  const label = formatDayLabel(day.date);
+  const todayBadge = day.isToday ? '<span class="today-badge">今日</span>' : '';
+  const itemsHtml = day.items.length
+    ? day.items.map(i => `<div class="day-item">${i.name}  ${i.qty}個</div>`).join('')
+    : `<div class="day-empty">${day.isPast ? '記録なし' : '予定なし'}</div>`;
+  return `
+    <div class="day-card ${day.isPast ? 'is-past' : ''} ${day.isToday ? 'is-today' : ''}">
+      <div class="day-head"><span class="day-date">${label}</span>${todayBadge}</div>
+      <div class="day-items">${itemsHtml}</div>
+      <div class="day-memo-row">
+        <input type="text" id="memo-${day.date}" placeholder="メモ(何があったか)" value="${escapeHtml(day.memo || '')}">
+        <button class="day-memo-save" onclick="saveMemoForDate('${day.date}')">保存</button>
+      </div>
+    </div>`;
+}
+
+async function showPreview(){
+  document.getElementById('homeView').hidden = true;
+  document.getElementById('previewView').hidden = false;
+  state.preview.mode = 'list';
+  document.getElementById('previewListBody').hidden = false;
+  document.getElementById('previewCalendarBody').hidden = true;
+
+  if (state.preview.days.length === 0) {
+    const start = addDaysStr(todayStr(), -1);
+    const end = addDaysStr(todayStr(), 13);
+    document.getElementById('previewDayList').innerHTML =
+      `<div class="empty-state"><div class="progress-track"><div class="progress-bar"></div></div></div>`;
+    try {
+      const data = await fetchPreviewRange(start, end);
+      state.preview.days = data.days;
+      state.preview.loadedStart = start;
+      state.preview.loadedEnd = end;
+    } catch (err) {
+      document.getElementById('previewDayList').innerHTML =
+        `<div class="empty-state"><div class="txt">読み込みに失敗しました</div></div>`;
+      return;
+    }
+  }
+  renderPreviewList();
+}
+
+function renderPreviewList(){
+  document.getElementById('previewDayList').innerHTML = state.preview.days.map(dayCardHTML).join('');
+}
+
+async function loadMorePastDays(){
+  const btn = document.getElementById('loadMoreBtn');
+  const original = btn.textContent;
+  btn.textContent = '読み込み中...';
+  const newEnd = addDaysStr(state.preview.loadedStart, -1);
+  const newStart = addDaysStr(newEnd, -6); // 直近7日分をさらに読み込む
+  try {
+    const data = await fetchPreviewRange(newStart, newEnd);
+    state.preview.days = [...data.days, ...state.preview.days];
+    state.preview.loadedStart = newStart;
+    renderPreviewList();
+  } catch (err) {
+    alert('読み込みに失敗しました: ' + err);
+  } finally {
+    btn.textContent = original;
+  }
+}
+
+function toggleCalendarMode(){
+  const listBody = document.getElementById('previewListBody');
+  const calBody = document.getElementById('previewCalendarBody');
+  if (state.preview.mode === 'list') {
+    state.preview.mode = 'calendar';
+    listBody.hidden = true;
+    calBody.hidden = false;
+    const today = new Date();
+    state.preview.calendarYear = today.getFullYear();
+    state.preview.calendarMonth = today.getMonth();
+    state.preview.selectedDate = todayStr();
+    renderCalendarGrid();
+    selectCalendarDate(state.preview.selectedDate);
+  } else {
+    state.preview.mode = 'list';
+    listBody.hidden = false;
+    calBody.hidden = true;
+  }
+}
+
+async function renderCalendarGrid(){
+  const y = state.preview.calendarYear;
+  const m = state.preview.calendarMonth;
+  document.getElementById('calMonthLabel').textContent = `${y}年${m + 1}月`;
+
+  const firstDay = new Date(y, m, 1);
+  const startOffset = firstDay.getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const monthStart = `${y}-${pad2(m+1)}-01`;
+  const monthEnd = `${y}-${pad2(m+1)}-${pad2(daysInMonth)}`;
+
+  let memoDates = new Set();
+  try {
+    const data = await fetchPreviewRange(monthStart, monthEnd);
+    memoDates = new Set(data.days.filter(d => d.memo).map(d => d.date));
+  } catch (err) { /* メモ取得に失敗しても日付は表示する */ }
+
+  const cells = [];
+  for (let i = 0; i < startOffset; i++) cells.push('<div class="cal-cell empty"></div>');
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dStr = `${y}-${pad2(m+1)}-${pad2(day)}`;
+    const isToday = dStr === todayStr();
+    const isSelected = dStr === state.preview.selectedDate;
+    const hasMemo = memoDates.has(dStr);
+    cells.push(`<div class="cal-cell ${isToday?'is-today':''} ${isSelected?'is-selected':''} ${hasMemo?'has-memo':''}" onclick="selectCalendarDate('${dStr}')">${day}</div>`);
+  }
+  document.getElementById('calGrid').innerHTML = cells.join('');
+}
+
+function changeCalendarMonth(delta){
+  let m = state.preview.calendarMonth + delta;
+  let y = state.preview.calendarYear;
+  if (m < 0) { m = 11; y -= 1; }
+  if (m > 11) { m = 0; y += 1; }
+  state.preview.calendarMonth = m;
+  state.preview.calendarYear = y;
+  renderCalendarGrid();
+}
+
+async function selectCalendarDate(dateStr){
+  state.preview.selectedDate = dateStr;
+  renderCalendarGrid();
+  const start = addDaysStr(dateStr, -3);
+  const end = addDaysStr(dateStr, 3);
+  const listEl = document.getElementById('calSelectedList');
+  listEl.innerHTML = `<div class="empty-state"><div class="progress-track"><div class="progress-bar"></div></div></div>`;
+  try {
+    const data = await fetchPreviewRange(start, end);
+    listEl.innerHTML = data.days.map(dayCardHTML).join('');
+  } catch (err) {
+    listEl.innerHTML = `<div class="empty-state"><div class="txt">読み込みに失敗しました</div></div>`;
+  }
+}
+
+async function saveMemoForDate(dateStr){
+  const input = document.getElementById('memo-' + dateStr);
+  const btn = input.nextElementSibling;
+  const original = btn.textContent;
+  btn.textContent = '...';
+  try {
+    await postMemo(dateStr, input.value);
+    const day = state.preview.days.find(d => d.date === dateStr);
+    if (day) day.memo = input.value;
+    btn.textContent = '保存済み';
+  } catch (err) {
+    btn.textContent = '失敗';
+  } finally {
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  }
+}
 </script>
 </body>
 </html>
